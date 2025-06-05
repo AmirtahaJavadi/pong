@@ -11,10 +11,13 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"golang.org/x/image/font"
+	"golang.org/x/image/font/gofont/goregular"
+	"golang.org/x/image/font/opentype"
 )
 
 type Game struct {
 	step   int
+	state  bool
 	Paddle *model.Paddle
 	Ball   *model.Ball
 	PointA int
@@ -75,12 +78,20 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	msg := "Hello, Ebitengine!"
-
+	msg := "Pong"
+	ttf, err := opentype.Parse(goregular.TTF)
+	if err != nil {
+		log.Fatal(err)
+	}
+	face2, _ := opentype.NewFace(ttf, &opentype.FaceOptions{
+		Size:    80,
+		DPI:     72,
+		Hinting: font.HintingFull,
+	})
 	// Choose a color
-	clr := color.Black
+	clr := color.White
 
-	fontData, err := os.ReadFile("path/to/yourfont.ttf")
+	fontData, err := os.ReadFile("assets/font.ttf")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -89,13 +100,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		log.Fatal(err)
 	}
 	face := truetype.NewFace(ttfFont, &truetype.Options{
-		Size:    24,
+		Size:    100,
 		DPI:     72,
 		Hinting: font.HintingNone,
 	})
 
 	// Draw the text at position (x=10, y=20)
-	text.Draw(screen, msg, face, 450, 300, clr)
 	screen.Fill(color.RGBA{0, 0, 100, 255})
 	PaddleY := ebiten.NewImage(20, 100)
 	PaddleY.Fill(color.White)
@@ -112,6 +122,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	opBall := &ebiten.DrawImageOptions{}
 	opBall.GeoM.Translate(g.Ball.BallX, g.Ball.BallY)
 	screen.DrawImage(ball, opBall)
+	text.Draw(screen, msg, face, 450, 300, clr)
+	text.Draw(screen, msg, face2, 450, 400, clr)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -127,7 +139,7 @@ func main() {
 		Ball: &model.Ball{
 			BallX:      450,
 			BallY:      300,
-			BallSpeedX: 10,
+			BallSpeedX: 5,
 			BallSpeedY: 4,
 		},
 	}
