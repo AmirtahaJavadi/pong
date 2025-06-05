@@ -1,8 +1,8 @@
 package model
 
 type Ball struct {
-	BallX      float64
-	BallY      float64
-	BallSpeedX float64
-	BallSpeedY float64
+	BallX      float64 `json:"ballX"`
+	BallY      float64 `json:"ballY"`
+	BallSpeedX float64 `json:"ballSpeedX"`
+	BallSpeedY float64 `json:"ballSpeedY"`
 }

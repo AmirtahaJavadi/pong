@@ -1,11 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"image/color"
 	"log"
 	"os"
 
+	"github.com/amirtahajavadi/pong/db"
 	"github.com/amirtahajavadi/pong/model"
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -115,6 +117,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	opX := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(20, g.Paddle.PaddleY)
 	opX.GeoM.Translate(860, g.Paddle.PaddleX)
+
 	screen.DrawImage(PaddleY, op)
 	screen.DrawImage(PaddleX, opX)
 	ball := ebiten.NewImage(20, 20)
@@ -122,6 +125,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	opBall := &ebiten.DrawImageOptions{}
 	opBall.GeoM.Translate(g.Ball.BallX, g.Ball.BallY)
 	screen.DrawImage(ball, opBall)
+	byte, err := json.Marshal(g.Ball)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db.Redis.Set("Ball", byte)
+	byte, err = json.Marshal(g.Paddle)
+	if err != nil {
+		log.Fatal(err)
+	}
+	db.Redis.Set("Players", byte)
 	text.Draw(screen, msg, face, 450, 300, clr)
 	text.Draw(screen, msg, face2, 450, 400, clr)
 }
@@ -131,6 +145,8 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func main() {
+	db.ConnectRedis()
+	db.Redis.Ping()
 	game := &Game{
 		Paddle: &model.Paddle{
 			PaddleY: 200,
